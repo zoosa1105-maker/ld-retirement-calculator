@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勞退純舊制提前結存試算器｜鄭大叔退休研究所</title>
+<style>
+  :root{
+    --navy:#0B2A4A;
+    --navy-dark:#081D33;
+    --navy-light:#123A63;
+    --gold:#C9A227;
+    --gold-light:#E4C868;
+    --paper:#F5F7FA;
+    --card:#FFFFFF;
+    --ink:#1B2733;
+    --muted:#5B6B7A;
+    --danger:#B23A3A;
+    --good:#1E7A46;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,sans-serif;
+    line-height:1.6;
+    -webkit-text-size-adjust:100%;
+    overflow-x:hidden;
+    width:100%;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 16px 40px;}
+  header.hero{
+    background:linear-gradient(160deg,var(--navy) 0%,var(--navy-dark) 100%);
+    color:#fff;
+    padding:28px 16px 34px;
+    text-align:center;
+    border-bottom:3px solid var(--gold);
+  }
+  header.hero .brand{
+    font-size:14px;
+    letter-spacing:2px;
+    color:var(--gold-light);
+    margin-bottom:6px;
+    font-weight:600;
+  }
+  header.hero h1{
+    font-size:clamp(22px,5.5vw,32px);
+    margin:0 0 10px;
+    font-weight:700;
+  }
+  header.hero p.sub{
+    font-size:15px;
+    color:#D9E2EC;
+    margin:0;
+  }
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 4px 18px rgba(11,42,74,0.08);
+    padding:20px 16px;
+    margin-top:20px;
+  }
+  .card h2{
+    font-size:18px;
+    color:var(--navy);
+    margin:0 0 4px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card h2 .num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:26px;height:26px;
+    border-radius:50%;
+    background:var(--navy);
+    color:#fff;
+    font-size:13px;
+    flex-shrink:0;
+  }
+  .card .desc{
+    font-size:13px;
+    color:var(--muted);
+    margin:0 0 16px;
+  }
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    color:var(--navy);
+    margin-bottom:6px;
+  }
+  .field .hint{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:4px;
+  }
+  input[type="number"], input[type="text"]{
+    width:100%;
+    height:50px;
+    font-size:17px;
+    padding:0 14px;
+    border:1.5px solid #D3DCE6;
+    border-radius:10px;
+    background:#FBFCFE;
+    color:var(--ink);
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  input[type="number"]:focus, input[type="text"]:focus{
+    outline:none;
+    border-color:var(--gold);
+    background:#fff;
+  }
+  .checkbox-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    background:#F0F4F8;
+    border-radius:10px;
+    padding:14px;
+  }
+  .checkbox-row input[type="checkbox"]{
+    width:24px;height:24px;
+    flex-shrink:0;
+    margin-top:2px;
+    accent-color:var(--navy);
+  }
+  .checkbox-row label{
+    font-size:15px;
+    font-weight:600;
+    color:var(--navy);
+  }
+  .assumption{
+    background:#FFF8E6;
+    border:1px solid var(--gold-light);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13px;
+    color:#7A5B00;
+    margin-top:16px;
+  }
+  .result-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:10px 0;
+    border-bottom:1px dashed #E1E7EE;
+    gap:8px;
+  }
+  .result-row:last-child{border-bottom:none;}
+  .result-row .label{font-size:14px;color:var(--muted);}
+  .result-row .value{
+    font-size:17px;
+    font-weight:700;
+    color:var(--navy);
+    text-align:right;
+    word-break:break-word;
+  }
+  .result-row .value.big{font-size:20px;color:var(--good);}
+  .compare-wrap{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+  @media (min-width:768px){
+    .compare-wrap{grid-template-columns:1fr 1fr;}
+  }
+  .compare-col{
+    border-radius:14px;
+    padding:18px 16px;
+  }
+  .compare-col.left{
+    background:#EEF2F6;
+    border:1.5px solid #D3DCE6;
+  }
+  .compare-col.right{
+    background:linear-gradient(160deg,#0B2A4A 0%,#123A63 100%);
+    color:#fff;
+    border:1.5px solid var(--gold);
+  }
+  .compare-col h3{
+    margin:0 0 12px;
+    font-size:15px;
+    letter-spacing:1px;
+  }
+  .compare-col.left h3{color:var(--navy);}
+  .compare-col.right h3{color:var(--gold-light);}
+  .compare-col .result-row .label{color:inherit;opacity:0.75;}
+  .compare-col.right .result-row{border-bottom-color:rgba(255,255,255,0.2);}
+  .compare-col.left .result-row .value{color:var(--navy);}
+  .compare-col.right .result-row .value{color:#fff;}
+  .diff-box{
+    text-align:center;
+    margin-top:22px;
+    padding:22px 14px;
+    border-radius:16px;
+    background:linear-gradient(160deg,#0B2A4A,#081D33);
+    color:#fff;
+  }
+  .diff-box .diff-label{
+    font-size:14px;
+    color:var(--gold-light);
+    letter-spacing:1px;
+    margin-bottom:8px;
+  }
+  .diff-box .diff-value{
+    font-size:clamp(26px,8vw,42px);
+    font-weight:800;
+    word-break:break-word;
+    line-height:1.2;
+  }
+  .diff-box .diff-note{
+    font-size:12px;
+    color:#B9C6D4;
+    margin-top:10px;
+  }
+  table.year-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+  table.year-table th, table.year-table td{
+    padding:10px 8px;
+    text-align:right;
+    border-bottom:1px solid #E7ECF1;
+  }
+  table.year-table th:first-child, table.year-table td:first-child{
+    text-align:left;
+    position:sticky;
+    left:0;
+    background:#fff;
+  }
+  table.year-table thead th{
+    background:var(--navy);
+    color:#fff;
+    position:sticky;
+    top:0;
+  }
+  table.year-table thead th:first-child{background:var(--navy);}
+  table.year-table tbody tr:nth-child(even){background:#F7FAFC;}
+  footer.disclaimer{
+    margin-top:24px;
+    padding:18px 16px;
+    font-size:12px;
+    color:var(--muted);
+    background:#EEF2F6;
+    border-radius:14px;
+    line-height:1.8;
+  }
+  footer.disclaimer strong{color:var(--navy);}
+  .brand-footer{
+    text-align:center;
+    font-size:12px;
+    color:#9AA8B5;
+    margin-top:18px;
+  }
+  button.recalc{
+    width:100%;
+    height:52px;
+    border:none;
+    border-radius:12px;
+    background:var(--gold);
+    color:var(--navy-dark);
+    font-size:16px;
+    font-weight:700;
+    margin-top:6px;
+    cursor:pointer;
+  }
+  button.recalc:active{background:var(--gold-light);}
+  .grid2{display:grid;grid-template-columns:1fr;gap:0;}
+  @media (min-width:640px){
+    .grid2{grid-template-columns:1fr 1fr;gap:0 16px;}
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="brand">鄭大叔退休研究所</div>
+  <h1>勞退純舊制提前結存試算器</h1>
+  <p class="sub">算清楚再決定，退休金不是跟著別人選。</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2><span class="num">1</span>基本資料輸入</h2>
+    <p class="desc">請輸入你的舊制年資與薪資資料，系統會自動試算退休金基數與金額。</p>
+
+    <div class="grid2">
+      <div class="field">
+        <label for="years">純舊制年資（年）</label>
+        <input type="number" id="years" inputmode="decimal" min="0" step="0.5" value="30" placeholder="例如 30">
+        <div class="hint">前15年每滿一年2個基數，超過15年每滿一年1個基數，最高45個基數（系統自動計算）</div>
+      </div>
+      <div class="field">
+        <label for="base">退休金基數</label>
+        <input type="number" id="base" inputmode="decimal" min="0" step="0.5" value="45">
+        <div class="hint">已自動帶入，如與你的個案不同可手動修改</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="avgWage">最後六個月平均工資（元）</label>
+      <input type="number" id="avgWage" inputmode="numeric" min="0" step="1000" value="70000" placeholder="例如 70000">
+    </div>
+
+    <div class="result-row">
+      <div class="label">舊制退休金（平均工資 × 基數）</div>
+      <div class="value" id="oldPensionOut">NT$ 0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span>提前結存投入新制個人專戶</h2>
+    <p class="desc">將舊制退休金結存視為一次投入本金，試算長期複利成長。</p>
+
+    <div class="field">
+      <label for="pv">提前結存投入金額（元）</label>
+      <input type="number" id="pv" inputmode="numeric" min="0" step="1000" value="3150000">
+      <div class="hint">預設帶入上方舊制退休金金額，可自行調整</div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label for="years2">投入年期（年）</label>
+        <input type="number" id="years2" inputmode="numeric" min="1" step="1" value="5">
+      </div>
+      <div class="field">
+        <label for="rate">年化報酬率（%）</label>
+        <input type="number" id="rate" inputmode="decimal" min="0" step="0.1" value="6">
+      </div>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="selfContribute">
+      <label for="selfContribute">純舊制＋自提 6%（勾選後可輸入月提繳工資）</label>
+    </div>
+
+    <div class="field" id="monthlyWageField" style="display:none;margin-top:14px;">
+      <label for="monthlyWage">自提 6% 的月提繳工資（元）</label>
+      <input type="number" id="monthlyWage" inputmode="numeric" min="0" step="1000" value="70000">
+      <div class="hint" id="monthlyContribHint">每月自提金額：NT$ 0／月</div>
+    </div>
+
+    <div class="assumption">
+      6% 為試算假設，不代表勞退基金未來實際收益或保證報酬。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">3</span>試算結果</h2>
+    <div class="result-row">
+      <div class="label">提前結存本金期末預估價值</div>
+      <div class="value" id="lumpFVOut">NT$ 0</div>
+    </div>
+    <div class="result-row" id="monthlyPrincipalRow" style="display:none;">
+      <div class="label">投資期間累積自提本金</div>
+      <div class="value" id="monthlyPrincipalOut">NT$ 0</div>
+    </div>
+    <div class="result-row" id="monthlyFVRow" style="display:none;">
+      <div class="label">自提部分期末預估價值</div>
+      <div class="value" id="monthlyFVOut">NT$ 0</div>
+    </div>
+    <div class="result-row">
+      <div class="label">最終帳戶總金額</div>
+      <div class="value big" id="totalFinalOut">NT$ 0</div>
+    </div>
+    <div class="result-row">
+      <div class="label">總投資收益</div>
+      <div class="value" id="totalGainOut">NT$ 0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">4</span>不提前結存 VS 提前結存＋自提6%</h2>
+    <div class="compare-wrap">
+      <div class="compare-col left">
+        <h3>不提前結存</h3>
+        <div class="result-row"><div class="label">舊制退休金</div><div class="value" id="cmpLeftPension">NT$ 0</div></div>
+        <div class="result-row"><div class="label">自提6%</div><div class="value">未計入</div></div>
+        <div class="result-row"><div class="label">比較期間</div><div class="value" id="cmpLeftYears">0 年</div></div>
+        <div class="result-row"><div class="label">期末金額</div><div class="value" id="cmpLeftFinal">NT$ 0</div></div>
+      </div>
+      <div class="compare-col right">
+        <h3>提前結存＋自提6%</h3>
+        <div class="result-row"><div class="label">提前結存投入本金</div><div class="value" id="cmpRightPV">NT$ 0</div></div>
+        <div class="result-row"><div class="label">每月自提6%金額</div><div class="value" id="cmpRightMonthly">NT$ 0</div></div>
+        <div class="result-row"><div class="label">自提本金總額</div><div class="value" id="cmpRightMonthlyTotal">NT$ 0</div></div>
+        <div class="result-row"><div class="label">投資收益</div><div class="value" id="cmpRightGain">NT$ 0</div></div>
+        <div class="result-row"><div class="label">期末總金額</div><div class="value" id="cmpRightFinal">NT$ 0</div></div>
+      </div>
+    </div>
+
+    <div class="diff-box">
+      <div class="diff-label">期滿後兩種方式預估差額</div>
+      <div class="diff-value" id="diffOut">NT$ 0</div>
+      <div class="diff-note">此比較暫時假設：舊制退休金維持原計算金額，不另外假設公司退休準備金產生個人投資報酬。</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">5</span>年度明細表</h2>
+    <p class="desc">預估勞退個人專戶金額（隨投入年期自動更新）</p>
+    <table class="year-table">
+      <thead>
+        <tr><th>時間點</th><th>預估個人專戶金額</th></tr>
+      </thead>
+      <tbody id="yearTableBody"></tbody>
+    </table>
+  </div>
+
+  <footer class="disclaimer">
+    <strong>免責聲明：</strong><br>
+    本試算工具僅供退休規劃與教育說明使用，實際制度、資格、平均工資、退休金基數及可提前結存金額，仍應依勞動部、勞保局及相關主管機關最新規定與個案認定為準。<br><br>
+    6% 為情境試算所使用的假設報酬率，不代表勞動基金未來實際收益，也不構成任何收益保證。
+  </footer>
+
+  <div class="brand-footer">鄭大叔退休研究所 © 勞退純舊制提前結存試算器</div>
+
+</div>
+
+<script>
+function fmt(n){
+  if (!isFinite(n)) n = 0;
+  n = Math.round(n);
+  return "NT$ " + n.toLocaleString("zh-TW");
+}
+
+function calcBase(years){
+  years = parseFloat(years);
+  if (!isFinite(years) || years < 0) years = 0;
+  var base;
+  if (years <= 15){
+    base = years * 2;
+  } else {
+    base = 15*2 + (years-15)*1;
+  }
+  if (base > 45) base = 45;
+  return Math.round(base*100)/100;
+}
+
+function lumpFV(pv, annualRatePct, years){
+  var r = (parseFloat(annualRatePct)||0)/100;
+  return pv * Math.pow(1+r, years);
+}
+
+function monthlyAnnuityFV(monthlyContribution, annualRatePct, years){
+  var r = (parseFloat(annualRatePct)||0)/100;
+  var months = years*12;
+  var rm = Math.pow(1+r, 1/12) - 1;
+  if (rm === 0) return monthlyContribution*months;
+  return monthlyContribution * ((Math.pow(1+rm, months) - 1) / rm);
+}
+
+var yearsEl = document.getElementById('years');
+var baseEl = document.getElementById('base');
+var avgWageEl = document.getElementById('avgWage');
+var pvEl = document.getElementById('pv');
+var years2El = document.getElementById('years2');
+var rateEl = document.getElementById('rate');
+var selfContributeEl = document.getElementById('selfContribute');
+var monthlyWageField = document.getElementById('monthlyWageField');
+var monthlyWageEl = document.getElementById('monthlyWage');
+var monthlyContribHint = document.getElementById('monthlyContribHint');
+
+var oldPensionOut = document.getElementById('oldPensionOut');
+var lumpFVOut = document.getElementById('lumpFVOut');
+var monthlyPrincipalRow = document.getElementById('monthlyPrincipalRow');
+var monthlyPrincipalOut = document.getElementById('monthlyPrincipalOut');
+var monthlyFVRow = document.getElementById('monthlyFVRow');
+var monthlyFVOut = document.getElementById('monthlyFVOut');
+var totalFinalOut = document.getElementById('totalFinalOut');
+var totalGainOut = document.getElementById('totalGainOut');
+
+var cmpLeftPension = document.getElementById('cmpLeftPension');
+var cmpLeftYears = document.getElementById('cmpLeftYears');
+var cmpLeftFinal = document.getElementById('cmpLeftFinal');
+var cmpRightPV = document.getElementById('cmpRightPV');
+var cmpRightMonthly = document.getElementById('cmpRightMonthly');
+var cmpRightMonthlyTotal = document.getElementById('cmpRightMonthlyTotal');
+var cmpRightGain = document.getElementById('cmpRightGain');
+var cmpRightFinal = document.getElementById('cmpRightFinal');
+var diffOut = document.getElementById('diffOut');
+var yearTableBody = document.getElementById('yearTableBody');
+
+var userEditedBase = false;
+var userEditedPV = false;
+
+baseEl.addEventListener('input', function(){ userEditedBase = true; recalc(); });
+pvEl.addEventListener('input', function(){ userEditedPV = true; recalc(); });
+
+yearsEl.addEventListener('input', function(){
+  if (!userEditedBase){
+    baseEl.value = calcBase(yearsEl.value);
+  }
+  recalc();
+});
+
+[avgWageEl, years2El, rateEl, monthlyWageEl].forEach(function(el){
+  el.addEventListener('input', recalc);
+});
+
+selfContributeEl.addEventListener('change', function(){
+  monthlyWageField.style.display = selfContributeEl.checked ? 'block' : 'none';
+  monthlyPrincipalRow.style.display = selfContributeEl.checked ? 'flex' : 'none';
+  monthlyFVRow.style.display = selfContributeEl.checked ? 'flex' : 'none';
+  recalc();
+});
+
+function recalc(){
+  var years = parseFloat(yearsEl.value) || 0;
+  var base = parseFloat(baseEl.value) || 0;
+  var avgWage = parseFloat(avgWageEl.value) || 0;
+  var oldPension = avgWage * base;
+  oldPensionOut.textContent = fmt(oldPension);
+
+  if (!userEditedPV){
+    pvEl.value = Math.round(oldPension);
+  }
+  var pv = parseFloat(pvEl.value) || 0;
+  var years2 = parseFloat(years2El.value) || 0;
+  var rate = parseFloat(rateEl.value) || 0;
+
+  var lv = lumpFV(pv, rate, years2);
+  lumpFVOut.textContent = fmt(lv);
+
+  var monthlyContribution = 0, monthlyPrincipal = 0, monthlyFV = 0;
+  var useContribution = selfContributeEl.checked;
+  if (useContribution){
+    var monthlyWage = parseFloat(monthlyWageEl.value) || 0;
+    monthlyContribution = monthlyWage * 0.06;
+    monthlyPrincipal = monthlyContribution * 12 * years2;
+    monthlyFV = monthlyAnnuityFV(monthlyContribution, rate, years2);
+    monthlyContribHint.textContent = "每月自提金額：" + fmt(monthlyContribution) + "／月";
+    monthlyPrincipalOut.textContent = fmt(monthlyPrincipal);
+    monthlyFVOut.textContent = fmt(monthlyFV);
+  }
+
+  var totalFinal = lv + monthlyFV;
+  var totalPrincipal = pv + monthlyPrincipal;
+  var totalGain = totalFinal - totalPrincipal;
+  totalFinalOut.textContent = fmt(totalFinal);
+  totalGainOut.textContent = fmt(totalGain);
+
+  // Comparison
+  cmpLeftPension.textContent = fmt(oldPension);
+  cmpLeftYears.textContent = years2 + " 年";
+  cmpLeftFinal.textContent = fmt(oldPension);
+
+  cmpRightPV.textContent = fmt(pv);
+  cmpRightMonthly.textContent = useContribution ? fmt(monthlyContribution) : "未勾選";
+  cmpRightMonthlyTotal.textContent = useContribution ? fmt(monthlyPrincipal) : "NT$ 0";
+  cmpRightGain.textContent = fmt(totalGain);
+  cmpRightFinal.textContent = fmt(totalFinal);
+
+  var diff = totalFinal - oldPension;
+  diffOut.textContent = fmt(diff);
+
+  // Year by year table
+  var n = Math.max(0, Math.round(years2));
+  var rows = "";
+  for (var k=0; k<=n; k++){
+    var lvK = lumpFV(pv, rate, k);
+    var mvK = useContribution ? monthlyAnnuityFV(monthlyContribution, rate, k) : 0;
+    var totalK = lvK + mvK;
+    var label = k === 0 ? "投入當下" : ("第" + k + "年");
+    rows += "<tr><td>" + label + "</td><td>" + fmt(totalK) + "</td></tr>";
+  }
+  yearTableBody.innerHTML = rows;
+}
+
+// init
+baseEl.value = calcBase(yearsEl.value);
+pvEl.value = Math.round(parseFloat(avgWageEl.value) * parseFloat(baseEl.value));
+recalc();
+</script>
+</body>
+</html>
